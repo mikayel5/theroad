@@ -1,43 +1,80 @@
 import logo from './logo.svg';
 import './App.css';
+import { Component } from 'react';
+import Counter from './Counter';
+import ExplainBindingsComponent from './ExplainBindingsComponent';
 
-
-const list =[
+const list = [
   {
-    title : 'Reassct',
-    url : 'https://reactjs.org',
-    author: 'Jordan Mike',
+    title:'React',
+    url:'sdfsf',
+    autor: "Jordan Walke",
     num_comments:3,
-    points: 4,
-    objectID:0,
-  },
-  {
-    title: "Rezzdux",
-    url : 'https://redux.js.org',
-    author: 'Dan Abramov, Andrew Clark',
-    num_comments:2,
     points: 5,
-    objectID:1,
+    obcejtID:0,
   }
 ]
 
+class App extends Component{
+  constructor(props){
+    super(props);
 
-function App() {
-  const hell = 'welcome to asdsad road'
-  return (
-    <div className="App">
-    {list.map(function(item){
-      return( 
-      <div key={item.objectID}>
-        <span> <a href={item.url}>{item.title}</a></span>
-        <span>{item.author}</span>
-        <span>{item.num_comments}</span>
-        <span>{item.points}</span>
-      </div>
-      );
-    })}
-    </div>
-  );
+
+    this.state = {
+      list,
+      searchTherm:''
+    };
+    this.onSearchChange = this.onSearchChange.bind(this)
+    this.onDismiss = this.onDismiss.bind(this);
+  };
+
+  // onDismiss(id){
+  //   const updateList = this.state.list.filter(function isNotid(item){
+  //     return item.obcejtID !== id;
+  //   })
+
+  //   this.setState({list:updateList})
+  //   // const updateList = this.state.list.filter(isNotid)
+  // }
+
+onDismiss(id){
+  const isNotId = item => item.obcejtID !== id;
+  const updatedList = this.state.list.filter(isNotId);
+  this.setState({list:updatedList});
 }
 
+onSearchChange(event){
+  this.setState({searchTherm: event.target.value})
+}
+
+  render (){
+    return(
+    <div className="App">
+      <form>
+        <input type= "text"
+          onChange={this.onSearchChange}
+        />
+      </form>
+      {this.state.list.map(item =>
+       <div key = {item.obcejtID}>
+        <span><a href={item.url}>{item.title}</a></span>
+        <span>{item.autor}</span>
+        <span>{item.num_comments}</span>
+        <span>{item.points}</span>
+        <span>
+          <button 
+            onClick={()=> this.onDismiss(item.obcejtID)}
+            type = "button"
+          >
+            Reset
+          </button>
+
+          <ExplainBindingsComponent/>
+        </span>
+       </div>
+      )}
+    </div>
+    )
+  }
+}
 export default App;
