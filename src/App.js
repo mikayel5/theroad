@@ -70,6 +70,7 @@ onSearchChange(event){
     const {searchTherm, list}=this.state
     return(
     <div className="App">
+      <div className="interactions">
        <Search
         value={searchTherm}
         onChange = {this.onSearchChange}
@@ -77,7 +78,7 @@ onSearchChange(event){
       >
         Search
         </Search>
-        
+       </div> 
       <Table
       list= {list}
       pattern= {searchTherm}
@@ -104,38 +105,22 @@ const {onClick, className="",children}=this.props;
     )
   }
 }
-
-
-// function Search(props){
-//   const {value, onChange,children} = props
-//       return (
-//           <from>
-//               {children}<input
-//                   type = "text"
-//                   value = {value}
-//                   onChange = {onChange}
-//               />
-//           </from>
-//       )
-  
-// }
-
 class Table extends Component {
  
   render (){
       const {list , pattern, onDismiss} = this.props
   
   return (
-      <div>
+      <div className="table">
          {list.filter(isSearched(pattern)).map(item =>
-       <div key = {item.obcejtID}>
-        <span><a href={item.url}>{item.title}</a></span>
-        <span>{item.autor}</span>
-        <span>{item.num_comments}</span>
-        <span>{item.points}</span>
-        <span>
+       <div key = {item.obcejtID} className="table-row">
+        <span style={{ width: '40%' }}><a href={item.url}>{item.title}</a></span>
+        <span style={{ width: '30%' }}>{item.autor}</span>
+        <span style={{ width: '10%' }}>{item.num_comments}</span>
+        <span style={{ width: '10%' }}>{item.points}</span>
+        <span style={{ width: '10%' }}>
           <Button onClick={()=>onDismiss(item.obcejtID)}
-          className="LAv button"
+          className="button-inline"
           >
             Reset
           </Button>
