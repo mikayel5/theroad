@@ -3,6 +3,7 @@ import './App.css';
 import { Component } from 'react';
 import Counter from './Counter';
 import ExplainBindingsComponent from './ExplainBindingsComponent';
+import Search from './Searc';
 
 
 const list = [
@@ -76,6 +77,7 @@ onSearchChange(event){
       >
         Search
         </Search>
+        
       <Table
       list= {list}
       pattern= {searchTherm}
@@ -104,20 +106,19 @@ const {onClick, className="",children}=this.props;
 }
 
 
-class Search extends Component{
-  render (){
-      const {value, onChange,children} = this.props
-      return (
-          <from>
-              {children}<input
-                  type = "text"
-                  value = {value}
-                  onChange = {onChange}
-              />
-          </from>
-      )
-  }
-}
+// function Search(props){
+//   const {value, onChange,children} = props
+//       return (
+//           <from>
+//               {children}<input
+//                   type = "text"
+//                   value = {value}
+//                   onChange = {onChange}
+//               />
+//           </from>
+//       )
+  
+// }
 
 class Table extends Component {
  
