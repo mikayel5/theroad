@@ -4,6 +4,7 @@ import { Component } from 'react';
 import Counter from './Counter';
 import ExplainBindingsComponent from './ExplainBindingsComponent';
 
+
 const list = [
   {
     title:'React',
@@ -11,9 +12,26 @@ const list = [
     autor: "Jordan Walke",
     num_comments:3,
     points: 5,
-    obcejtID:0,
-  }
+    obcejtID:1,
+  },
+  {
+    title: 'Redux',
+    url: 'https://redux.js.org/',
+    autor: 'Dan Abramov, Andrew Clark',
+    num_comments: 2,
+    points: 5,
+    objectID: 2,
+    },
+    
 ]
+
+// function isSearched(searchTherm){
+//   return function(item){
+//     return item.title.toLowerCase().includes(searchTherm.toLowerCase());
+//   }
+// }
+
+const isSearched = searchTherm => item =>item.title.toLowerCase().includes(searchTherm.toLowerCase())
 
 class App extends Component{
   constructor(props){
@@ -48,33 +66,84 @@ onSearchChange(event){
 }
 
   render (){
+    const {searchTherm, list}=this.state
     return(
     <div className="App">
-      <form>
-        <input type= "text"
-          onChange={this.onSearchChange}
-        />
-      </form>
-      {this.state.list.map(item =>
+       <Search
+        value={searchTherm}
+        onChange = {this.onSearchChange}
+      
+      >
+        Search
+        </Search>
+      <Table
+      list= {list}
+      pattern= {searchTherm}
+      onDismiss = {this.onDismiss}
+      
+      /> 
+    </div>
+    )
+  }
+}
+
+class Button extends Component{
+  render(){
+const {onClick, className="",children}=this.props;
+
+    return(
+      <button
+        onClick = {onClick}
+        className = {className}
+        type= "button"
+      >
+        {children}
+      </button>
+    )
+  }
+}
+
+
+class Search extends Component{
+  render (){
+      const {value, onChange,children} = this.props
+      return (
+          <from>
+              {children}<input
+                  type = "text"
+                  value = {value}
+                  onChange = {onChange}
+              />
+          </from>
+      )
+  }
+}
+
+class Table extends Component {
+ 
+  render (){
+      const {list , pattern, onDismiss} = this.props
+  
+  return (
+      <div>
+         {list.filter(isSearched(pattern)).map(item =>
        <div key = {item.obcejtID}>
         <span><a href={item.url}>{item.title}</a></span>
         <span>{item.autor}</span>
         <span>{item.num_comments}</span>
         <span>{item.points}</span>
         <span>
-          <button 
-            onClick={()=> this.onDismiss(item.obcejtID)}
-            type = "button"
+          <Button onClick={()=>onDismiss(item.obcejtID)}
+          className="LAv button"
           >
             Reset
-          </button>
-
-          <ExplainBindingsComponent/>
+          </Button>
         </span>
        </div>
       )}
-    </div>
-    )
+          
+      </div>
+  )
   }
 }
 export default App;
