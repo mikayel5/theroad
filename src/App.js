@@ -6,32 +6,19 @@ import ExplainBindingsComponent from './ExplainBindingsComponent';
 import Search from './Searc';
 
 
-const list = [
-  {
-    title:'React',
-    url:'sdfsf',
-    autor: "Jordan Walke",
-    num_comments:3,
-    points: 5,
-    obcejtID:1,
-  },
-  {
-    title: 'Redux',
-    url: 'https://redux.js.org/',
-    autor: 'Dan Abramov, Andrew Clark',
-    num_comments: 2,
-    points: 5,
-    objectID: 2,
-    },
-    
-]
+const DEFAULT_QUERY='redux';
+
+
+const PATH_BASE = "https://hn.algolia.com/api/v1";
+const PATH_SEARCH = '/search';
+const PARAM_SEARCH = 'query=';
 
 // function isSearched(searchTherm){
 //   return function(item){
 //     return item.title.toLowerCase().includes(searchTherm.toLowerCase());
 //   }
 // }
-
+//նույն բանն ա
 const isSearched = searchTherm => item =>item.title.toLowerCase().includes(searchTherm.toLowerCase())
 
 class App extends Component{
@@ -40,12 +27,30 @@ class App extends Component{
 
 
     this.state = {
-      list,
-      searchTherm:''
+      result: null,
+      searchTherm: DEFAULT_QUERY
     };
+
+    this.setSearchTopStore = this.setSearchTopStore.bind(this)
     this.onSearchChange = this.onSearchChange.bind(this)
     this.onDismiss = this.onDismiss.bind(this);
   };
+
+
+  setSearchTopStore(result){
+    this.setState({result});
+  }
+
+
+componentDidMount(){
+  const{searchTherm} = this.state;
+
+  
+  fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTherm}`)
+  .then(response => response.json())
+  .then(result =>this.setSearchTopStore(result))
+  .catch(error => error)
+}
 
   // onDismiss(id){
   //   const updateList = this.state.list.filter(function isNotid(item){
@@ -67,7 +72,9 @@ onSearchChange(event){
 }
 
   render (){
-    const {searchTherm, list}=this.state
+    const {searchTherm, result}=this.state
+    console.log(this.state)
+    if (!result){return null;}
     return(
     <div className="App">
       <div className="interactions">
@@ -80,7 +87,7 @@ onSearchChange(event){
         </Search>
        </div> 
       <Table
-      list= {list}
+      list= {result.hits}
       pattern= {searchTherm}
       onDismiss = {this.onDismiss}
       
