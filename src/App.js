@@ -92,7 +92,7 @@ class App extends Component {
     const { searchKey, results } = this.state;
     const { hits, page } = results[searchKey];
 
-    const isNotId = (item) => item.obcejtID !== id;
+    const isNotId = (item) => item.objectID !== id;
     const updatedHits = hits.filter(isNotId);
     this.setState({
       results: {
@@ -164,7 +164,7 @@ class Button extends Component {
 const Table = ({ list, onDismiss }) => (
   <div className="table">
     {list.map((item) => (
-      <div key={item.obcejtID} className="table-row">
+      <div key={item.objectID} className="table-row">
         <span style={{ width: "40%" }}>
           <a href={item.url}>{item.title}</a>
         </span>
@@ -173,7 +173,7 @@ const Table = ({ list, onDismiss }) => (
         <span style={{ width: "10%" }}>{item.points}</span>
         <span style={{ width: "10%" }}>
           <Button
-            onClick={() => onDismiss(item.obcejtID)}
+            onClick={() => onDismiss(item.objectID)}
             className="button-inline"
           >
             Reset
