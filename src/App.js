@@ -1,12 +1,15 @@
 import "./App.css";
 import { Component } from "react";
+import axios from "axios";
 
 const DEFAULT_QUERY = "redux";
+const DEFAULT_HPP = "100";
 
 const PATH_BASE = "https://hn.algolia.com/api/v1";
 const PATH_SEARCH = "/search";
 const PARAM_SEARCH = "query=";
-
+const PARAM_PAGE = "page=";
+const PARAM_HPP = "hitsPerPage=";
 // function isSearched(searchTherm){
 //   return function(item){
 //     return item.title.toLowerCase().includes(searchTherm.toLowerCase());
@@ -17,14 +20,17 @@ const PARAM_SEARCH = "query=";
 //   item.title.toLowerCase().includes(searchTherm.toLowerCase());
 
 class App extends Component {
+  _isMounted = false;
   constructor(props) {
     super(props);
 
     this.state = {
-      result: null,
+      results: null,
+      searchKey: " ",
       searchTherm: DEFAULT_QUERY,
+      error: null,
     };
-
+    this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
     this.setSearchTopStore = this.setSearchTopStore.bind(this);
     this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
@@ -32,49 +38,80 @@ class App extends Component {
     this.onDismiss = this.onDismiss.bind(this);
   }
 
-  setSearchTopStore(result) {
-    this.setState({ result });
+  needsToSearchTopStories(searchTherm) {
+    return !this.state.results[searchTherm];
   }
 
-  fetchSearchTopStories(searchTherm) {
-    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTherm}`)
-      .then((response) => response.json())
-      .then((result) => this.setSearchTopStore(result))
-      .catch((error) => error);
+  setSearchTopStore(result) {
+    const { hits, page } = result;
+    const { searchKey, results } = this.state;
+    const oldHits =
+      results && results[searchKey] ? results[searchKey].hits : [];
+    const updatedHits = [...oldHits, ...hits];
+
+    this.setState({
+      results: { ...results, [searchKey]: { hits: updatedHits, page } },
+    });
+  }
+
+  fetchSearchTopStories(searchTherm, page = 0) {
+    axios(
+      `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTherm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`
+    )
+      .then((result) => this._isMounted && this.setSearchTopStore(result.data))
+      .catch((error) => this._isMounted && this.setState({ error }));
   }
   componentDidMount() {
+    this._isMounted = true;
     const { searchTherm } = this.state;
+    this.setState({ searchKey: searchTherm });
     this.fetchSearchTopStories(searchTherm);
   }
-  onSearchSubmit(event) {
-    const { searchTherm } = this.state;
-    this.fetchSearchTopStories(searchTherm);
-    event.preventDefault();
-  }
 
-  // onDismiss(id){
-  //   const updateList = this.state.list.filter(function isNotid(item){
-  //     return item.obcejtID !== id;
-  //   })
-
-  //   this.setState({list:updateList})
-  //   // const updateList = this.state.list.filter(isNotid)
-  // }
-
-  onDismiss(id) {
-    const isNotId = (item) => item.obcejtID !== id;
-    const updatedHits = this.state.result.hits.filter(isNotId);
-    this.setState({
-      result: { ...this.state.result, hits: updatedHits },
-    });
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   onSearchChange(event) {
     this.setState({ searchTherm: event.target.value });
   }
 
+  onSearchSubmit(event) {
+    const { searchTherm } = this.state;
+    this.setState({ searchKey: searchTherm });
+    this.fetchSearchTopStories(searchTherm);
+
+    if (this.needsToSearchTopStories(searchTherm)) {
+      this.fetchSearchTopStories(searchTherm);
+    }
+
+    event.preventDefault();
+  }
+
+  onDismiss(id) {
+    const { searchKey, results } = this.state;
+    const { hits, page } = results[searchKey];
+
+    const isNotId = (item) => item.obcejtID !== id;
+    const updatedHits = hits.filter(isNotId);
+    this.setState({
+      results: {
+        ...results,
+        [searchKey]: { hits: updatedHits, page },
+      },
+    });
+  }
+
   render() {
-    const { searchTherm, result } = this.state;
+    const { searchTherm, results, searchKey, error } = this.state;
+    const page =
+      (results && results[searchKey] && results[searchKey].page) || 0;
+    const list =
+      (results && results[searchKey] && results[searchKey].hits) || [];
+
+    if (error) {
+      return <p>some one wrong</p>;
+    }
     return (
       <div className="page">
         <div className="interactions">
@@ -86,7 +123,20 @@ class App extends Component {
             Search
           </Search>
         </div>
-        {result && <Table list={result.hits} onDismiss={this.onDismiss} />}
+        {error ? (
+          <div className="interactions">
+            <p>Something went wrong.</p>
+          </div>
+        ) : (
+          <Table list={list} onDismiss={this.onDismiss} />
+        )}
+        <div className="interactions">
+          <Button
+            onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}
+          >
+            MORE
+          </Button>
+        </div>
       </div>
     );
   }
